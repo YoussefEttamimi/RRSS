@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  db:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    build: ./mongo-DB
+    ports:
+      - "27017:27017"
+    networks:
+      - my-network
+  backend:
+    build: ./Back-RRSS
+    volumes:
+      - ./Back-RRSS:/app/rrss_backend
+    container_name: rrss-backend
+    restart: always
+    ports:
+      - "3800:3800"
+    depends_on:
+      - db
+    networks:
+      - my-network
+  frontend:
+    build:
+      context: Front-RRSS
+      target: builder
+    ports:
+      - 4200:4200
+    volumes:
+      - ./Front-RRSS:/project
+      - /project/node_modules
+networks:
+  my-network:
+    driver: bridge

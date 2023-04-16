@@ -1,0 +1,47 @@
+<div class="card flex justify-content-center">
+  <p-toast></p-toast>
+  <p-card header="Register" subheader="create new user" [style]="{ width: '360px',margin: 'auto' }">
+    <ng-template pTemplate="header">
+      <img alt="Card" src="https://primefaces.org/cdn/primeng/images/usercard.png" />
+    </ng-template>
+    <form [formGroup]="formUser">
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-user"></i>
+        </span>
+        <input pInputText placeholder="Username" formControlName="name" />
+      </div>
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-user"></i>
+        </span>
+        <input pInputText placeholder="Surname" formControlName="surname" />
+      </div>
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-user"></i>
+        </span>
+        <input pInputText placeholder="Nick" formControlName="nick" />
+      </div>
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          @ivan la chupa
+        </span>
+        <input pInputText placeholder="Email"
+        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+        type="email" formControlName="email" />
+      </div>
+      <div class="p-inputgroup">
+        <span class="p-inputgroup-addon">
+          <i class="pi pi-lock"></i>
+        </span>
+        <input pInputText placeholder="Password" formControlName="password" type="password" />
+      </div>
+    </form>
+    <ng-template pTemplate="footer">
+      <p-button label="Save" (click)="onSubmit()" icon="pi pi-check"></p-button>
+      <p-button label="Cancel" (click)="onCancel()" icon="pi pi-times" styleClass="p-button-secondary"
+        [style]="{ 'margin-left': '.5em' }"></p-button>
+    </ng-template>
+  </p-card>
+</div>
