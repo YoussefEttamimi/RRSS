@@ -1,42 +1,72 @@
-const io = require('../index');
+'use strict';
+var auth = require('../middleware/authenticated');
+const messageController = require('../controllers/message');
+var userSockets = [];
 
-const clients = new Map();
+const socketMessage = (io) => {
+  io.on("connection", (socket) => {
+    console.log('Cliente conectado: ' + socket.id);
 
-io.on('connection', (socket) => {
-  console.log('A new client connected');
+    socket.on('session_start', (data) => {
 
-  socket.on('message', (data) => {
-    console.log(`Received message: ${data}`);
+      var userSocketIndex = userSockets.findIndex(userSocket => userSocket.userID == data);
 
-    const message = JSON.parse(data);
-
-    if (message.type === 'login') {
-      // Add new client to clients Map
-      clients.set(message.username, socket);
-      console.log(`Client ${message.username} logged in`);
-    } else if (message.type === 'message') {
-      // Send message to recipient
-      const recipientSocket = clients.get(message.recipient);
-      if (recipientSocket) {
-        const messageData = {
-          type: 'message',
-          sender: message.sender,
-          text: message.text
-        };
-        recipientSocket.send(JSON.stringify(messageData));
-        console.log(`Sent message to ${message.recipient}`);
+      //Si encontramos el registro.
+      if (userSocketIndex != -1) {
+        userSockets[userSocketIndex].socketID = socket.id;
       }
-    }
-  });
-
-  io.on('close', () => {
-    console.log('Client disconnected');
-    // Remove client from clients Map
-    clients.forEach((value, key) => {
-      if (value === socket) {
-        clients.delete(key);
-        console.log(`Removed client ${key}`);
+      //Si no encontramos el registro.
+      else {
+        userSockets.push({ userID: data, socketID: socket.id });
       }
     });
+
+    socket.on("disconnect", (reason) => {
+      console.log('Cliente desconectado: ' + socket.id);
+      var userSocketIndex = userSockets.findIndex(userSocket => userSocket.socketID == socket.id);
+      if (userSocketIndex != -1) {
+        userSockets.splice(userSocketIndex, 1);
+      }
+    });
+
+    socket.on("newMessage", (token, message) => {
+
+      var user = auth.ensureAuthSocket(token);
+      if (user != '') {
+
+        messageController.saveMessageSocket(user, message).then((result) => {
+          if (result.error) {
+            socket.emit("newMessageKO", result.message);
+          }
+          else {
+
+            //Si todo ha ido bien, debemos informar a quien envió en mensaje y a quien lo recibe.
+            var emitter = result.messageStored.emitter._id.toString();
+            var receiver = result.messageStored.receiver._id.toString();
+
+            //Buscamos el socket del emisor para ver si está conectado.
+            var emitterSocket = userSockets.find(userSocket => userSocket.userID == emitter);
+            if (emitterSocket != undefined) {
+              socket.emit("newMessageOK", result.messageStored);
+            }
+
+            //Buscamos el socket del receptor para ver si está conectado.
+            var receiverSocket = userSockets.find(userSocket => userSocket.userID == receiver);
+            if (receiverSocket != undefined) {
+              socket.to(receiverSocket.socketID).emit("newMessageOK", result.messageStored);
+            }
+
+          }
+        });
+
+      }
+      else {
+        socket.emit("newMessageKO", "Error de autenticación");
+      }
+
+    });
+
   });
-});
+}
+
+module.exports = { socketMessage };

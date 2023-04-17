@@ -5,7 +5,7 @@ const moment = require('moment');
 const secret = 'clave_secreta';
 
 
-exports.ensureAuth = (req, res, next) => {
+const ensureAuth = (req, res, next) => {
     if (!req.headers.authorization) {
         return res.status(403).send({ message: 'La petición no tiene cabecera de autenticación' });
     }
@@ -25,4 +25,29 @@ exports.ensureAuth = (req, res, next) => {
     req.user = payload;
 
     next();
+}
+
+const ensureAuthSocket = (_token) => {
+
+    var token = _token.replace(/['"]+/g, '');
+
+    try {
+
+        var payload = jwt.decode(token, secret);
+
+        if (payload.exp <= moment().unix()) {
+            return '';
+        }
+
+        return payload;
+
+    } catch (error) {
+        return '';
+    }
+
+}
+
+module.exports = {
+    ensureAuth,
+    ensureAuthSocket,
 }

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const http = require('http');
 const socketIO = require('socket.io');
+const websocket = require('./webSocket/message');
 
 const port = 3800;
 
@@ -16,12 +17,11 @@ mongoose.connect('mongodb://db:27017/curso_mean_social')
         const server = http.createServer(app);
 
         // Inicializar Socket.IO
-        const io =  require("socket.io")(server, {
+        const io = require("socket.io")(server, {
             cors: { origin: "http://localhost:4200" }
-          });
+        });
 
-        // Exportar Socket.IO
-        module.exports = io;
+        websocket.socketMessage(io);
 
         // Iniciar servidor
         server.listen(port, () => {
