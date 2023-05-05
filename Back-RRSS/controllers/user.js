@@ -200,7 +200,8 @@ const uploadImage = (async (req, res) => {
             return removeFile(file_path, res, "No tienes permiso para actualizar este usuario");
         }
 
-        if (file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif') {
+        if (file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif'
+        || file_ext == 'ico') {
             try {
                 const userUpdated = await User.findByIdAndUpdate(userId, { image: file_name }, { new: true });
                 if (!userUpdated) return res.status(404).send({ message: "No se ha podido actualizar el usuario" });

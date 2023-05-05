@@ -52,21 +52,19 @@ export class UserEditComponent implements OnInit {
       }
 
       const observables = this.formUser.value.image ? [
-        this._userService.editUser(userEdit),
-        this._uploadService.upbloadImage(this.formUser.value.image, this.userLogged._id)
+        this._uploadService.upbloadImage(this.formUser.value.image, userEdit._id),
       ] : [
         this._userService.editUser(userEdit),
       ];
       forkJoin(observables).subscribe({
         next: (rep) => {
           this._messageService.add({ severity: 'success', summary: 'Success', detail: 'User edited' });
-          const user = {
-            ...rep[0].user,
-            image: rep[1]?.user.image,
+          if (rep[1]?.user.image) {
+            this._sessionService.setUser({ ...rep[0].user, image: rep[1].user.image });
+            this.url = `${GLOBAL.url}user/get_image/${rep[1].user.image}`;
+          } else {
+            this._sessionService.setUser(rep[0].user);
           }
-          this._sessionService.setUser(user);
-          if(rep[1]?.user.image)
-          this.url = `${GLOBAL.url}user/get_image/${rep[1].user.image}`;
         },
         error: (err) => {
           this._messageService.add({ severity: 'error', summary: 'Error', detail: err.error.message });

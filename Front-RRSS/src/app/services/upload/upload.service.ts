@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { GLOBAL } from '../global';
@@ -20,9 +20,11 @@ export class UploadService {
   public upbloadImage(file: File, id: string): Observable<any> {
     let formData = new FormData();
     formData.append('image', file, file.name);
-    return this._http.post(this.url + '/user/upload_image/' + id, formData, {
-      headers: this._sessionService.getHeaders(true)
-     });
+    return this._http.post(
+      `${this.url}user/upload_image/${id}`,
+      formData,
+      { headers: this._sessionService.getHeaders() }
+    );
   }
 
 }

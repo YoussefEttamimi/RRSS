@@ -6,6 +6,7 @@ const secret = 'clave_secreta';
 
 
 const ensureAuth = (req, res, next) => {
+    console.log('ensureAuth');
     if (!req.headers.authorization) {
         return res.status(403).send({ message: 'La petición no tiene cabecera de autenticación' });
     }
@@ -13,6 +14,7 @@ const ensureAuth = (req, res, next) => {
     const token = req.headers.authorization.replace(/['"]+/g, '');
 
     try {
+        console.log('token');
         var payload = jwt.decode(token, secret);
 
         if (payload.exp <= moment().unix()) {
