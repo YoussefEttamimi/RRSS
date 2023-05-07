@@ -18,7 +18,7 @@ export class SessionService {
   private stats: Subject<Stats> = new Subject<Stats>();
   public stats$ = this.stats.asObservable();
 
-  constructor() {}
+  constructor() { }
 
   init(): void {
     const user = this.getUser();
@@ -57,11 +57,14 @@ export class SessionService {
     return stats ? JSON.parse(stats) : null;
   }
 
-  getHeaders(isToken: boolean = false): HttpHeaders {
-    let headers = new HttpHeaders().set(
-      'Content-Type',
-      'application/json'
-    );
+  getHeaders(isToken: boolean = false, isImg = false): HttpHeaders {
+    let headers = new HttpHeaders();
+    if (!isImg) {
+      headers = headers.set(
+        'Content-Type',
+        'application/json'
+      );
+    }
     if (isToken) {
       const token = this.getToken();
       if (token) {

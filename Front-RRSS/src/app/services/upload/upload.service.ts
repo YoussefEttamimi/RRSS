@@ -23,7 +23,7 @@ export class UploadService {
     return this._http.post(
       `${this.url}user/upload_image/${id}`,
       formData,
-      { headers: this._sessionService.getHeaders() }
+      { headers: this._sessionService.getHeaders(true,true) }
     );
   }
 
